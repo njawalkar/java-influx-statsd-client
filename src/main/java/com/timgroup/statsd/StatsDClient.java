@@ -178,17 +178,4 @@ public interface StatsDClient {
      */
     void histogram(String aspect, long value, String... tags);
 
-    /**
-     * Records a run status for the specified named service check.
-     *
-     * @param sc
-     *     the service check object
-     */
-    void recordServiceCheckRun(ServiceCheck sc);
-
-    /**
-     * Convenience method equivalent to {@link #recordServiceCheckRun(ServiceCheck sc)}.
-     */
-    void serviceCheck(ServiceCheck sc);
-
 }

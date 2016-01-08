@@ -296,29 +296,6 @@ public class NonBlockingStatsDClientTest {
     }
 
     @Test(timeout=5000L) public void
-    sends_service_check() throws Exception {
-        final String inputMessage = "\u266c \u2020\u00f8U \n\u2020\u00f8U \u00a5\u00bau|m: T0\u00b5 \u266a"; // "♬ †øU \n†øU ¥ºu|m: T0µ ♪"
-        final String outputMessage = "\u266c \u2020\u00f8U \\n\u2020\u00f8U \u00a5\u00bau|m\\: T0\u00b5 \u266a"; // note the escaped colon
-        final String[] tags = {"key1:val1", "key2:val2"};
-        final ServiceCheck sc = ServiceCheck.builder()
-                .withName("my_check.name")
-                .withStatus(ServiceCheck.Status.WARNING)
-                .withMessage(inputMessage)
-                .withHostname("i-abcd1234")
-                .withTags(tags)
-                .withTimestamp(1420740000)
-                .build();
-
-        assertEquals(outputMessage, sc.getEscapedMessage());
-
-        client.serviceCheck(sc);
-        server.waitForMessage();
-
-        assertThat(server.messagesReceived(), contains(String.format("_sc|my_check.name|1|d:1420740000|h:i-abcd1234|#key2:val2,key1:val1|m:%s",
-                outputMessage)));
-    }
-
-    @Test(timeout=5000L) public void
     sends_nan_gauge_to_statsd() throws Exception {
         client.recordGaugeValue("mygauge", Double.NaN);
 
