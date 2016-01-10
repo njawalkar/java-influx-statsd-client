@@ -1,23 +1,9 @@
-java-dogstatsd-client
+java-influx-statsd-client
 ==================
 
 A statsd client library implemented in Java.  Allows for Java applications to easily communicate with statsd.
 
-This version is forked from the upstream [java-statsd-client](https://github.com/youdevise/java-statsd-client) project, adding support for [DataDog](http://datadoghq.com/) extensions for use with [dogstatsd](http://docs.datadoghq.com/guides/dogstatsd/).
-
-This version also adds support for empty or null prefixes, to allow a client to send arbitrary statistic names.
-
-Downloads
----------
-The client jar is distributed via maven central, and can be downloaded [here](http://search.maven.org/#search%7Cga%7C1%7Cg%3Acom.timgroup%20a%3Ajava-statsd-client).
-
-```xml
-<dependency>
-    <groupId>com.indeed</groupId>
-    <artifactId>java-dogstatsd-client</artifactId>
-    <version>2.0.12</version>
-</dependency>
-```
+This version is forked from the upstream [java-dogstatsd-client](https://github.com/indeedeng/java-dogstatsd-client) project, adding support for [InfluxDB](https://influxdb.com/blog/2015/11/03/getting_started_with_influx_statsd.html) style metric tags.
 
 Usage
 -----
@@ -31,7 +17,7 @@ public class Foo {
     "my.prefix",                          /* prefix to any stats; may be null or empty string */
     "statsd-host",                        /* common case: localhost */
     8125,                                 /* port */
-    new String[] {"tag:value"}            /* DataDog extension: Constant tags, always applied */
+    new String[] {"tag=value"}            /* InfluxDB extension: Constant tags, always applied */
   );
 
   public static final void main(String[] args) {
@@ -43,7 +29,7 @@ public class Foo {
 
     /* expects times in milliseconds
      */
-    statsd.recordExecutionTime("bag", 25, "cluster:foo"); /* DataDog extension: cluster tag */
+    statsd.recordExecutionTime("bag", 25, "cluster=foo"); /* InfluxDB extension: cluster tag */
   }
 }
 ```
