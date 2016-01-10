@@ -172,7 +172,12 @@ public final class NonBlockingStatsDClient implements StatsDClient {
      */
     public NonBlockingStatsDClient(String prefix, String hostname, int port, String[] constantTags, StatsDClientErrorHandler errorHandler) throws StatsDClientException {
         if(prefix != null && prefix.length() > 0) {
+          if(!prefix.endsWith( "." )){
             this.prefix = String.format("%s.", prefix);
+          }
+          else{
+            this.prefix = prefix;
+          }
         } else {
             this.prefix = "";
         }
@@ -226,19 +231,19 @@ public final class NonBlockingStatsDClient implements StatsDClient {
     /**
      * Generate a suffix conveying the given tag list to the client
      */
-    static String tagString(final String[] tags, final String tagPrefix) {
+    static String tagString(final String[] tags, final String prefix) {
         StringBuilder sb;
-        if(tagPrefix != null) {
+        if(prefix != null) {
             if(tags == null || tags.length == 0) {
-                return tagPrefix;
+                return prefix;
             }
-            sb = new StringBuilder(tagPrefix);
+            sb = new StringBuilder(prefix);
             sb.append(",");
         } else {
             if(tags == null || tags.length == 0) {
                 return "";
             }
-            sb = new StringBuilder("|#");
+            sb = new StringBuilder(",");
         }
 
         for(int n=tags.length - 1; n>=0; n--) {
@@ -271,7 +276,7 @@ public final class NonBlockingStatsDClient implements StatsDClient {
      */
     @Override
     public void count(String aspect, long delta, String... tags) {
-        send(String.format("%s%s:%d|c%s", prefix, aspect, delta, tagString(tags)));
+        send(String.format("%s%s%s:%d|c", prefix, aspect, tagString(tags), delta ));
     }
 
     /**
@@ -336,7 +341,7 @@ public final class NonBlockingStatsDClient implements StatsDClient {
     public void recordGaugeValue(String aspect, double value, String... tags) {
         /* Intentionally using %s rather than %f here to avoid
          * padding with extra 0s to represent precision */
-        send(String.format("%s%s:%s|g%s", prefix, aspect, NUMBER_FORMATTERS.get().format(value), tagString(tags)));
+        send(String.format("%s%s%s:%s|g", prefix, aspect, tagString(tags), NUMBER_FORMATTERS.get().format(value)));
     }
 
     /**
@@ -362,7 +367,7 @@ public final class NonBlockingStatsDClient implements StatsDClient {
      */
     @Override
     public void recordGaugeValue(String aspect, long value, String... tags) {
-        send(String.format("%s%s:%d|g%s", prefix, aspect, value, tagString(tags)));
+        send(String.format("%s%s%s:%d|g", prefix, aspect, tagString(tags), value));
     }
 
     /**
@@ -387,7 +392,7 @@ public final class NonBlockingStatsDClient implements StatsDClient {
      */
     @Override
     public void recordExecutionTime(String aspect, long timeInMs, String... tags) {
-        send(String.format("%s%s:%d|ms%s", prefix, aspect, timeInMs, tagString(tags)));
+        send(String.format("%s%s%s:%d|ms", prefix, aspect, tagString(tags), timeInMs));
     }
 
     /**
@@ -414,7 +419,7 @@ public final class NonBlockingStatsDClient implements StatsDClient {
     public void recordHistogramValue(String aspect, double value, String... tags) {
         /* Intentionally using %s rather than %f here to avoid
          * padding with extra 0s to represent precision */
-        send(String.format("%s%s:%s|h%s", prefix, aspect, NUMBER_FORMATTERS.get().format(value), tagString(tags)));
+        send(String.format("%s%s%s:%s|h", prefix, aspect, tagString(tags), NUMBER_FORMATTERS.get().format(value)));
     }
 
     /**
@@ -439,7 +444,7 @@ public final class NonBlockingStatsDClient implements StatsDClient {
      */
     @Override
     public void recordHistogramValue(String aspect, long value, String... tags) {
-        send(String.format("%s%s:%d|h%s", prefix, aspect, value, tagString(tags)));
+        send(String.format("%s%s%s:%d|h", prefix, aspect, tagString(tags), value));
     }
 
     /**

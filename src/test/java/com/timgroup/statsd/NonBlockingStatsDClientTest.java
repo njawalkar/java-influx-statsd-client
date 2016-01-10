@@ -1,15 +1,16 @@
 package com.timgroup.statsd;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.junit.Assert.assertEquals;
 
 import java.net.SocketException;
 import java.util.Locale;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.assertEquals;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 
 public class NonBlockingStatsDClientTest {
 
@@ -62,10 +63,10 @@ public class NonBlockingStatsDClientTest {
     sends_counter_value_to_statsd_with_tags() throws Exception {
 
 
-        client.count("mycount", 24, "foo:bar", "baz");
+        client.count("mycount", 24, "foo=bar", "baz");
         server.waitForMessage();
 
-        assertThat(server.messagesReceived(), contains("my.prefix.mycount:24|c|#baz,foo:bar"));
+        assertThat(server.messagesReceived(), contains("my.prefix.mycount,baz,foo=bar:24|c"));
     }
 
     @Test(timeout=5000L) public void
@@ -82,10 +83,10 @@ public class NonBlockingStatsDClientTest {
     sends_counter_increment_to_statsd_with_tags() throws Exception {
 
 
-        client.incrementCounter("myinc", "foo:bar", "baz");
+        client.incrementCounter("myinc", "foo=bar", "baz");
         server.waitForMessage();
 
-        assertThat(server.messagesReceived(), contains("my.prefix.myinc:1|c|#baz,foo:bar"));
+        assertThat(server.messagesReceived(), contains("my.prefix.myinc,baz,foo=bar:1|c"));
     }
 
     @Test(timeout=5000L) public void
@@ -102,10 +103,10 @@ public class NonBlockingStatsDClientTest {
     sends_counter_decrement_to_statsd_with_tags() throws Exception {
 
 
-        client.decrementCounter("mydec", "foo:bar", "baz");
+        client.decrementCounter("mydec", "foo=bar", "baz");
         server.waitForMessage();
 
-        assertThat(server.messagesReceived(), contains("my.prefix.mydec:-1|c|#baz,foo:bar"));
+        assertThat(server.messagesReceived(), contains("my.prefix.mydec,baz,foo=bar:-1|c"));
     }
 
     @Test(timeout=5000L) public void
@@ -152,20 +153,20 @@ public class NonBlockingStatsDClientTest {
     sends_gauge_to_statsd_with_tags() throws Exception {
 
 
-        client.recordGaugeValue("mygauge", 423, "foo:bar", "baz");
+        client.recordGaugeValue("mygauge", 423, "foo=bar", "baz");
         server.waitForMessage();
 
-        assertThat(server.messagesReceived(), contains("my.prefix.mygauge:423|g|#baz,foo:bar"));
+        assertThat(server.messagesReceived(), contains("my.prefix.mygauge,baz,foo=bar:423|g"));
     }
 
     @Test(timeout=5000L) public void
     sends_double_gauge_to_statsd_with_tags() throws Exception {
 
 
-        client.recordGaugeValue("mygauge", 0.423, "foo:bar", "baz");
+        client.recordGaugeValue("mygauge", 0.423, "foo=bar", "baz");
         server.waitForMessage();
 
-        assertThat(server.messagesReceived(), contains("my.prefix.mygauge:0.423|g|#baz,foo:bar"));
+        assertThat(server.messagesReceived(), contains("my.prefix.mygauge,baz,foo=bar:0.423|g"));
     }
 
     @Test(timeout=5000L) public void
@@ -192,20 +193,20 @@ public class NonBlockingStatsDClientTest {
     sends_histogram_to_statsd_with_tags() throws Exception {
 
 
-        client.recordHistogramValue("myhistogram", 423, "foo:bar", "baz");
+        client.recordHistogramValue("myhistogram", 423, "foo=bar", "baz");
         server.waitForMessage();
 
-        assertThat(server.messagesReceived(), contains("my.prefix.myhistogram:423|h|#baz,foo:bar"));
+        assertThat(server.messagesReceived(), contains("my.prefix.myhistogram,baz,foo=bar:423|h"));
     }
 
     @Test(timeout=5000L) public void
     sends_double_histogram_to_statsd_with_tags() throws Exception {
 
 
-        client.recordHistogramValue("myhistogram", 0.423, "foo:bar", "baz");
+        client.recordHistogramValue("myhistogram", 0.423, "foo=bar", "baz");
         server.waitForMessage();
 
-        assertThat(server.messagesReceived(), contains("my.prefix.myhistogram:0.423|h|#baz,foo:bar"));
+        assertThat(server.messagesReceived(), contains("my.prefix.myhistogram,baz,foo=bar:0.423|h"));
     }
 
     @Test(timeout=5000L) public void
@@ -233,10 +234,10 @@ public class NonBlockingStatsDClientTest {
         try {
 
 
-            client.recordExecutionTime("mytime", 123, "foo:bar", "baz");
+            client.recordExecutionTime("mytime", 123, "foo=bar", "baz");
             server.waitForMessage();
 
-            assertThat(server.messagesReceived(), contains("my.prefix.mytime:123|ms|#baz,foo:bar"));
+            assertThat(server.messagesReceived(), contains("my.prefix.mytime,baz,foo=bar:123|ms"));
         } finally {
             // reset the default Locale in case changing it has side-effects
             Locale.setDefault(originalDefaultLocale);
@@ -248,21 +249,21 @@ public class NonBlockingStatsDClientTest {
     sends_timer_to_statsd_with_tags() throws Exception {
 
 
-        client.recordExecutionTime("mytime", 123, "foo:bar", "baz");
+        client.recordExecutionTime("mytime", 123, "foo=bar", "baz");
         server.waitForMessage();
 
-        assertThat(server.messagesReceived(), contains("my.prefix.mytime:123|ms|#baz,foo:bar"));
+        assertThat(server.messagesReceived(), contains("my.prefix.mytime,baz,foo=bar:123|ms"));
     }
 
 
     @Test(timeout=5000L) public void
     sends_gauge_mixed_tags() throws Exception {
 
-        final NonBlockingStatsDClient empty_prefix_client = new NonBlockingStatsDClient("my.prefix", "localhost", STATSD_SERVER_PORT, new String[] {"instance:foo", "app:bar"});
+        final NonBlockingStatsDClient empty_prefix_client = new NonBlockingStatsDClient("my.prefix", "localhost", STATSD_SERVER_PORT, new String[] {"instance=foo", "app=bar"});
         empty_prefix_client.gauge("value", 423, "baz");
         server.waitForMessage();
 
-        assertThat(server.messagesReceived(), contains("my.prefix.value:423|g|#app:bar,instance:foo,baz"));
+        assertThat(server.messagesReceived(), contains("my.prefix.value,app=bar,instance=foo,baz:423|g"));
     }
 
     @Test(timeout=5000L) public void
@@ -272,7 +273,7 @@ public class NonBlockingStatsDClientTest {
         empty_prefix_client.gauge("value", 423);
         server.waitForMessage();
 
-        assertThat(server.messagesReceived(), contains("my.prefix.value:423|g|#app:bar,instance:foo"));
+        assertThat(server.messagesReceived(), contains("my.prefix.value,app:bar,instance:foo:423|g"));
     }
 
     @Test(timeout=5000L) public void
@@ -302,5 +303,29 @@ public class NonBlockingStatsDClientTest {
         server.waitForMessage();
 
         assertThat(server.messagesReceived(), contains("my.prefix.mygauge:NaN|g"));
+    }
+
+    @Test(timeout=5000L) public void
+    tagWithNoPrefix() throws Exception{
+    	String tagString = client.tagString( new String[]{"a=b", "c=d"}, null );
+    	assertEquals( ",c=d,a=b", tagString );
+    }
+
+    @Test(timeout=5000L) public void
+    tagWithPrefix() throws Exception{
+    	String tagString = client.tagString( new String[]{"a=b", "c=d"}, ",x=y" );
+    	assertEquals( ",x=y,c=d,a=b", tagString );
+    }
+
+    @Test(timeout=5000L) public void
+    noTagWithPrefix() throws Exception{
+    	String tagString = client.tagString( new String[]{}, ",x=y" );
+    	assertEquals( ",x=y", tagString );
+    }
+
+    @Test(timeout=5000L) public void
+    noTagWithNoPrefix() throws Exception{
+    	String tagString = client.tagString( new String[]{}, "" );
+    	assertEquals( "", tagString );
     }
 }
