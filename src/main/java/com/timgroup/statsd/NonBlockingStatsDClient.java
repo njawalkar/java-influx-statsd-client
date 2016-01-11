@@ -498,7 +498,7 @@ public final class NonBlockingStatsDClient implements StatsDClient {
                 handler.handle(
                         new IOException(
                             String.format(
-                                "Could not send entirely stat %s to host %s:%d. Only sent %d bytes out of %d bytes",
+                                "Could not send stats [%s] to host [%s:%d]. Only sent %d bytes out of %d bytes",
                                 sendBuffer.toString(),
                                 address.getHostName(),
                                 address.getPort(),
